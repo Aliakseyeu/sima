@@ -26,6 +26,9 @@ class LoginTest extends TestCase
         $response->assertOk();
     }
 
+
+    
+
     /*public function testUserCanNotLoginWithEmptyData(): void
     {
         $response = $this->from('/login')->post('/login', []);
