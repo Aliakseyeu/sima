@@ -11,6 +11,8 @@ use Faker;
 class LoginTest extends TestCase
 {
 
+    //todo repository
+
     use Traits\UserTrait;
 
     public function setUp()
@@ -27,7 +29,7 @@ class LoginTest extends TestCase
     }
 
 
-    
+
 
     /*public function testUserCanNotLoginWithEmptyData(): void
     {
