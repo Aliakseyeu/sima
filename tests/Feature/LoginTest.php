@@ -4,34 +4,27 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use Illuminate\Support\Facades\Hash;
-use Tests\Feature\Repositories\UserRepository;
 use App\User;
 use Faker;
 
 class LoginTest extends TestCase
 {
 
-    //todo repository !!!!!!!
-
-    use Traits\UserTrait;
+    protected $userRepository;
 
     public function setUp()
     {
         parent::setUp();
-        dd(bcrypt('ok'));
+        $this->userRepository = new UserRepository();   
     }
 
     public function testIsLoginPageAvailable(): void
     {
-        dd(bcrypt('ok'));
         $response = $this->get('/login');
         $response->assertOk();
     }
 
-
-
-
-    /*public function testUserCanNotLoginWithEmptyData(): void
+    public function testUserCanNotLoginWithEmptyData(): void
     {
         $response = $this->from('/login')->post('/login', []);
         $response->assertRedirect('/login');
@@ -42,8 +35,8 @@ class LoginTest extends TestCase
     {
         $response = $this->from('/login')
             ->post('/login', [
-                'email' => $this->user->email.'asd', 
-                'password' => $this->password
+                'email' => $this->userRepository->getUser()->email.'asd', 
+                'password' => $this->userRepository->getPassword()
             ]);
         $response->assertRedirect('/login');
         $this->assertGuest();
@@ -53,7 +46,7 @@ class LoginTest extends TestCase
     {
         $response = $this->from('/login')
             ->post('/login', [
-                'email' => $this->user->email, 
+                'email' => $this->userRepository->getUser()->email, 
                 'password' => 'wrong-pass'
             ]);
         $response->assertRedirect('/login');
@@ -63,18 +56,18 @@ class LoginTest extends TestCase
     public function testUserCanLoginWithCorrectData(): void
     {
         $response = $this->post('/login', [
-            'email' => $this->user->email,
-            'password' => $this->password,
+            'email' => $this->userRepository->getUser()->email,
+            'password' => $this->userRepository->getpassword(),
         ]);
         $response->assertRedirect('/');
-        $this->assertAuthenticatedAs($this->user);
+        $this->assertAuthenticatedAs($this->userRepository->getUser());
     }
 
     public function testAuthenticatedUserCanNotSeeLoginPage():void
     {
-        $response = $this->actingAs($this->user)->get('/login');
+        $response = $this->actingAs($this->userRepository->getUser())->get('/login');
         $response->assertRedirect('/');
-    }*/
+    }
 
     
 }
