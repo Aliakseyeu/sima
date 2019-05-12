@@ -21,12 +21,23 @@ class UserRepository
 
     protected function createInstance(): void
     {
-        $this->user = factory(User::class)->create([
+        $this->user = factory(User::class)->make([
                 'name' => $this->faker->firstName,
                 'email' => $this->faker->unique()->safeEmail,
                 'phone' => $this->faker->phoneNumber,
                 'surname' => $this->faker->lastName,
                 'password' => $this->password,
+            ]
+        );
+    }
+
+    public function getRegisterData(): array
+    {
+        return array_merge(
+            $this->user->toArray(),
+            [
+                'password' => $this->password,
+                'password_confirmation' => $this->password
             ]
         );
     }

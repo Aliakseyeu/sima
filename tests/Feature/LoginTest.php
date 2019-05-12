@@ -15,7 +15,8 @@ class LoginTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->userRepository = new UserRepository();   
+        $this->userRepository = new UserRepository();
+        $this->userRepository->getUser()->save();
     }
 
     public function testIsLoginPageAvailable(): void

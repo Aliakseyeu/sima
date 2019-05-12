@@ -14,6 +14,7 @@ class LogoutTest extends TestCase
     {
         parent::setUp();
         $this->userRepository = new UserRepository();
+        $this->userRepository->getUser()->save();
     }
 
     public function testNotAuthenticatedUserCanNotLogout(): void
