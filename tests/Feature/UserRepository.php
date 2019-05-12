@@ -53,9 +53,10 @@ class UserRepository
         return Hash::check($password, $hash);
     }
 
-    public function store(): void
+    public function store(): self
     {
         $this->user->save();
+        return $this;
     }
 
     public function getCount(): int
