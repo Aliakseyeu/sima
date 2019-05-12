@@ -16,7 +16,7 @@ class LoginTest extends TestCase
     {
         parent::setUp();
         $this->userRepository = new UserRepository();
-        $this->userRepository->getUser()->save();
+
     }
 
     public function testIsLoginPageAvailable(): void
@@ -56,9 +56,10 @@ class LoginTest extends TestCase
 
     public function testUserCanLoginWithCorrectData(): void
     {
+        $this->userRepository->store();
         $response = $this->post('/login', [
             'email' => $this->userRepository->getUser()->email,
-            'password' => $this->userRepository->getpassword(),
+            'password' => $this->userRepository->getPassword(),
         ]);
         $response->assertRedirect('/');
         $this->assertAuthenticatedAs($this->userRepository->getUser());

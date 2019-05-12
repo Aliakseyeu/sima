@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Faker;
 use App\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
 
 class UserRepository
@@ -26,7 +27,7 @@ class UserRepository
                 'email' => $this->faker->unique()->safeEmail,
                 'phone' => $this->faker->phoneNumber,
                 'surname' => $this->faker->lastName,
-                'password' => $this->password,
+                'password' => Hash::make($this->password),
             ]
         );
     }
@@ -40,6 +41,31 @@ class UserRepository
                 'password_confirmation' => $this->password
             ]
         );
+    }
+
+    public function findUserByEmail(): Collection
+    {
+        return User::whereEmail($this->user->email)->get();
+    }
+
+    public function checkPasswords(string $password, string $hash): bool
+    {
+        return Hash::check($password, $hash);
+    }
+
+    public function store(): void
+    {
+        $this->user->save();
+    }
+
+    public function getCount(): int
+    {
+        return User::count();
+    }
+
+    public function getRandomUser(): User
+    {
+        return User::inRandomOrder()->first();
     }
 
     public function getUser(): User

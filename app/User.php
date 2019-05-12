@@ -84,9 +84,9 @@ class User extends Authenticatable
         return new Delivery(json_decode($this->pivot->delivery_info));
     }
 
-    public function setPasswordAttribute($value) {
-        $this->attributes['password'] = Hash::make($value);
-    }
+    // public function setPasswordAttribute($value) {
+    //     $this->attributes['password'] = Hash::make($value);
+    // }
 
     /*
      * Relationships
