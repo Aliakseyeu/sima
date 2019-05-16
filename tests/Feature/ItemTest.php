@@ -29,7 +29,7 @@ class ItemTest extends BaseItem
 
     public function testNotAuthenticatedUserCanNotSeeItemSearchPage(): void
     {
-        $response = $this->get('$this->actualUrl');
+        $response = $this->get($this->actualUrl);
         $response->assertRedirect('/login');
     }
     
