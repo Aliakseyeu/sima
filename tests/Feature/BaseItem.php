@@ -38,7 +38,7 @@ class BaseItem extends BaseGroup
 	
 	public function attachUser(int $count = 1): void
 	{
-		for($i = 0; $i <= $count; $i++){
+		for($i = 0; $i < $count; $i++){
 			$qty = rand(1, 10);
 			$delivery = $this->getDeliveryPrice($this->item->pid, $qty);
 		    $this->order->users()->attach(
