@@ -2,19 +2,8 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-
-class LogoutTest extends TestCase
+class LogoutTest extends BaseUser
 {
-
-    protected $userRepository;
-    protected $user;
-
-    public function setUp()
-    {
-        parent::setUp();
-        $this->userRepository = new UserRepository();
-    }
 
     public function testNotAuthenticatedUserCanNotLogout(): void
     {
@@ -24,7 +13,7 @@ class LogoutTest extends TestCase
 
     public function testAuthenticatedUserCanLogout(): void
     {
-        $response = $this->actingAs($this->userRepository->getUser())->post('/logout');
+        $response = $this->actingAs($this->getUser())->post('/logout');
         $response->assertRedirect('/');
         $this->assertGuest();
     }

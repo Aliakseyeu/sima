@@ -2,9 +2,8 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 
-class IndexTest extends TestCase
+class IndexTest extends BaseUser
 {
     /**
      * A basic test example.

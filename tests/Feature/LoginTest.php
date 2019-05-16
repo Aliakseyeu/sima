@@ -2,22 +2,8 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use Illuminate\Support\Facades\Hash;
-use App\User;
-use Faker;
-
-class LoginTest extends TestCase
+class LoginTest extends BaseUser
 {
-
-    protected $userRepository;
-
-    public function setUp()
-    {
-        parent::setUp();
-        $this->userRepository = new UserRepository();
-
-    }
 
     public function testIsLoginPageAvailable(): void
     {
@@ -36,8 +22,8 @@ class LoginTest extends TestCase
     {
         $response = $this->from('/login')
             ->post('/login', [
-                'email' => $this->userRepository->getUser()->email.'asd', 
-                'password' => $this->userRepository->getPassword()
+                'email' => $this->getUser()->email.'asd', 
+                'password' => $this->getPassword()
             ]);
         $response->assertRedirect('/login');
         $this->assertGuest();
@@ -47,7 +33,7 @@ class LoginTest extends TestCase
     {
         $response = $this->from('/login')
             ->post('/login', [
-                'email' => $this->userRepository->getUser()->email, 
+                'email' => $this->getUser()->email, 
                 'password' => 'wrong-pass'
             ]);
         $response->assertRedirect('/login');
@@ -56,18 +42,17 @@ class LoginTest extends TestCase
 
     public function testUserCanLoginWithCorrectData(): void
     {
-        $this->userRepository->store();
         $response = $this->post('/login', [
-            'email' => $this->userRepository->getUser()->email,
-            'password' => $this->userRepository->getPassword(),
+            'email' => $this->getUser()->email,
+            'password' => $this->getPassword(),
         ]);
         $response->assertRedirect('/');
-        $this->assertAuthenticatedAs($this->userRepository->getUser());
+        $this->assertAuthenticatedAs($this->getUser());
     }
 
     public function testAuthenticatedUserCanNotSeeLoginPage():void
     {
-        $response = $this->actingAs($this->userRepository->getUser())->get('/login');
+        $response = $this->actingAs($this->getUser())->get('/login');
         $response->assertRedirect('/');
     }
 

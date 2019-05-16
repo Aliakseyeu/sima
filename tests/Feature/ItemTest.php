@@ -2,78 +2,70 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 
 use \Illuminate\Foundation\Testing\TestResponse as Response;
-use Tests\Feature\{
-    GroupRepository,
-    ItemRepository,
-    UserRepository
-};
 
-class ItemTest extends TestCase
+class ItemTest extends BaseItem
 {
 
     // TODO testUserCanNotFindExistentItemWithoutGroupId
     
-    protected $itemRepository;
-    protected $groupRepository;
-    protected $userRepository;
-
-    protected $actualGroup;
+//    protected $itemRepository;
+//    protected $groupRepository;
+//    protected $userRepository;
+//
     protected $actualUrl;
-    
-
+//    
+//
     public function setUp(): void
     {
         parent::setUp();
-        $this->groupRepository = new GroupRepository();
-        $this->actualGroup = $this->groupRepository->getActualGroup();
-        $this->actualUrl = $this->getItemCreateUrl($this->actualGroup);
-        $this->userRepository = new UserRepository();
+        $this->actualUrl = $this->getItemCreateUrl($this->getGroup()->id);
+        
+////        $this->userRepository = new UserRepository();
+//        $this->itemRepository = new ItemRepository();
+//        dd($this->itemRepository->getItems());
     }
 
     public function testNotAuthenticatedUserCanNotSeeItemSearchPage(): void
     {
-        $response = $this->get($this->actualUrl);
+        $response = $this->get('$this->actualUrl');
         $response->assertRedirect('/login');
     }
-
-    public function testAuthenticatedUserCanSeeItemSearchPage(): void
+    
+    protected function getItemCreateUrl(int $group = NULL): string
     {
-        $response = $this->actingAs($this->userRepository->store()->getUser())->get($this->actualUrl);
+        return '/item/create/'.$group;
+    }
+    
+    /*public function testAuthenticatedUserCanSeeItemSearchPage(): void
+    {
+        $response = $this->actingAs($this->getUser())->get($this->actualUrl);
         $response->assertOk();
     }
-
+    
     public function testUserCanNotSeeItemSearchPageWithoutGroup(): void
     {
-        $response = $this->actingAs($this->userRepository->store()->getUser())
-            ->get($this->getItemCreateUrl($this->groupRepository->getEmptyGroup()));
+        $response = $this->actingAs($this->getUser())
+            ->get($this->getItemCreateUrl());
         $response->assertStatus(404);
     }
-
+    
     public function testUserCanNotFindItemWithoutSid(): void
     {
-        $response = $this->executeQuery($this->actualUrl, $this->getQueryData('', $this->actualGroup->id));
+        $response = $this->executeQuery($this->actualUrl, $this->getQueryData(null, $this->getGroup()->id));
         $response->assertRedirect($this->actualUrl);
         $response->assertSessionHasErrors('sid');
     }
-
+    
     public function testUserCanNotFindExistentItemWithoutGroupId()
     {
         $response = $this->executeQuery($this->actualItemUrl, $this->getQueryData($this->actualItem->sid, null));
         $response->assertRedirect($this->actualItemUrll);
         $response->assertSessionHasErrors('group');
     }
-
-    protected function executeQuery(string $url, array $data): Response
-    {
-        return $this->from($url)
-            ->actingAs($this->userRepository->store()->getUser())
-            ->post('/item/show', $data);
-    }
-
-    protected function getQueryData(int $sid, int $group): array
+    
+    protected function getQueryData(int $sid = null, int $group = null): array
     {
         return [
             'sid' => $sid,
@@ -81,10 +73,26 @@ class ItemTest extends TestCase
         ];
     }
 
-    protected fun ction getItemCreateUrl(Group $group): string
+    
+    
+    protected function executeQuery(string $url, array $data): Response
     {
-        return '/item/create/'.$group->id;
+        return $this->from($url)
+            ->actingAs($this->getUser())
+            ->post('/item/show', $data);
     }
+    
+
+//
+
+//
+
+//
+
+//
+
+//
+
 
     /*protected $gropRepository;
     protected $itemRepository;
