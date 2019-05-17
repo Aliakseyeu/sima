@@ -13,3 +13,5 @@ yarn-error.log
 .env
 .phpunit.result.cache
 sftp-config.json
+sima_clcs.csprj
+sima.clpprj
