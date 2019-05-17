@@ -25,9 +25,10 @@ class BaseGroup extends BaseUser
 		return $this->group;
 	}
 	
-	public function __destruct()
-	{
-		$this->group->delete();
+	public function tearDown(): void
+    {
+		parent::tearDown();
+		$this->group->truncate();
 	}
 	
 	

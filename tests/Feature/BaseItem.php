@@ -64,8 +64,9 @@ class BaseItem extends BaseGroup
 			    ->withContentType('application/json')
 			    ->asJson()
 			    ->get();
-			return ($data->items)[0];
+//			sleep(1);
 		} while(!is_array($data->items) || count($data->items) <= 0);
+		return ($data->items)[0];
 	}
 	
 	protected function getDeliveryPrice(int $id, int $qty): object
@@ -83,7 +84,7 @@ class BaseItem extends BaseGroup
         ];
     }
 	
-	protected function getRandomSids(int $count = 20): string
+	protected function getRandomSids(int $count = 50): string
 	{
 		$sids = [];
 		while($count > 0){
@@ -97,6 +98,14 @@ class BaseItem extends BaseGroup
 	public function getItem(): Item
 	{
 		return $this->item;
+	}
+	
+	public function tearDown(): void
+    {
+		parent::tearDown();
+		$this->order->users()->sync([]);
+		$this->order->truncate();
+		$this->item->truncate();
 	}
 	
 //	public function __construct()

@@ -7,13 +7,11 @@ use \Illuminate\Foundation\Testing\TestResponse as Response;
 class RegisterTest extends BaseUser
 {
 
-    protected $count;
     protected $registerUrl = '/register';
 
     public function setUp()
     {
         parent::setUp();
-        $this->count = $this->getUsersCount() - 1; // sub one because in parent`s setUp registering one more user
     }
 
     public function testIsRegisterPageAvailable(): void
@@ -26,7 +24,7 @@ class RegisterTest extends BaseUser
     {
         $response = $this->post($this->registerUrl, $data = $this->getRegisterData());
         $response->assertRedirect('/');
-        $this->assertEquals($this->count + 1, $this->getUsersCount());
+        $this->assertEquals(1, $this->getUsersCount());
         $this->assertAuthenticatedAs($user = $this->findUsersByEmail()->first());
         $this->assertEquals($data['name'], $user->name);
         $this->assertEquals($data['surname'], $user->surname);
@@ -44,8 +42,10 @@ class RegisterTest extends BaseUser
 
     public function testUserCanNotRegisterWithRegisteredEmail(): void
     {
+    	$registeredUser = $this->createUser();
         $response = $this->from($this->registerUrl)
-            ->post($this->registerUrl, $this->mergeRegisterData(['email' => $this->getRandomUser()->email]));
+            ->post($this->registerUrl, $this->mergeRegisterData(['email' => $registeredUser->email]));
+        $registeredUser->delete();
         $this->isUserNotRegistered($response, 'email');
     }
 
@@ -71,7 +71,7 @@ class RegisterTest extends BaseUser
     protected function isUserNotRegistered(Response $response, string $errorKey): void
     {
         $response->assertRedirect($this->registerUrl);
-        $this->assertEquals($this->count, $this->getUsersCount());
+        $this->assertEquals(0, $this->getUsersCount());
         $response->assertSessionHasErrors($errorKey);
         $this->assertGuest();
     }

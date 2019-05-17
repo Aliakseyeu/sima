@@ -7,62 +7,89 @@ use \Illuminate\Foundation\Testing\TestResponse as Response;
 
 class ItemTest extends BaseItem
 {
+	
+	// todo last test
 
-    // TODO testUserCanNotFindExistentItemWithoutGroupId
+    protected $url;
+    protected $itemUrl;
     
-//    protected $itemRepository;
-//    protected $groupRepository;
-//    protected $userRepository;
-//
-    protected $actualUrl;
-//    
-//
     public function setUp(): void
     {
         parent::setUp();
-        $this->actualUrl = $this->getItemCreateUrl($this->getGroup()->id);
-        
-////        $this->userRepository = new UserRepository();
-//        $this->itemRepository = new ItemRepository();
-//        dd($this->itemRepository->getItems());
+        $this->url = $this->getItemCreateUrl($this->getGroup()->id);
+        $this->itemUrl = $this->getItemCreateUrl($this->getItem()->order->group->id);
     }
 
     public function testNotAuthenticatedUserCanNotSeeItemSearchPage(): void
     {
-        $response = $this->get($this->actualUrl);
+        $response = $this->get($this->url);
         $response->assertRedirect('/login');
-    }
-    
-    protected function getItemCreateUrl(int $group = NULL): string
-    {
-        return '/item/create/'.$group;
-    }
-    
-    /*public function testAuthenticatedUserCanSeeItemSearchPage(): void
-    {
-        $response = $this->actingAs($this->getUser())->get($this->actualUrl);
-        $response->assertOk();
     }
     
     public function testUserCanNotSeeItemSearchPageWithoutGroup(): void
     {
-        $response = $this->actingAs($this->getUser())
-            ->get($this->getItemCreateUrl());
+        $response = $this->actingAs($this->getUser())->get($this->getItemCreateUrl());
         $response->assertStatus(404);
+    }
+    
+    public function testAuthenticatedUserCanSeeItemSearchPage(): void
+    {
+        $response = $this->actingAs($this->getUser())->get($this->url);
+        $response->assertOk();
     }
     
     public function testUserCanNotFindItemWithoutSid(): void
     {
-        $response = $this->executeQuery($this->actualUrl, $this->getQueryData(null, $this->getGroup()->id));
-        $response->assertRedirect($this->actualUrl);
+        $response = $this->executeQuery(
+            $this->url, 
+            $this->getQueryData(null, $this->getGroup()->id)
+        );
+        $response->assertRedirect($this->url);
         $response->assertSessionHasErrors('sid');
     }
     
     public function testUserCanNotFindExistentItemWithoutGroupId()
     {
-        $response = $this->executeQuery($this->actualItemUrl, $this->getQueryData($this->actualItem->sid, null));
-        $response->assertRedirect($this->actualItemUrll);
+        $response = $this->executeQuery(
+            $this->itemUrl, 
+            $this->getQueryData($this->getItem()->sid, null)
+        );
+        $response->assertRedirect($this->itemUrl);
         $response->assertSessionHasErrors('group');
+    }
+    
+    public function testUserCanNotFindNonExistentItem()
+    {
+        $response = $this->from($this->itemUrl)
+            ->actingAs($this->getUser())
+            ->post('/item/show', [
+                'sid' => '1',
+                'group' => $this->getItem()->order->group->id
+            ]);
+        $response->assertSessionHasErrors(0);
+        $this->assertTrue($response->exception instanceof \App\Exceptions\NotFoundException);
+        $response->assertRedirect('/');
+    }
+    
+    public function testUserCanFindExistentItem()
+    {
+        $response = $this->executeQuery(
+            $this->itemUrl, 
+            $this->getQueryData($this->getItem()->sid, $this->getItem()->order->group->id)
+        );
+        $response->assertOk();
+        $response->assertViewIs('orders.create.exists');
+        $response->assertSee('Количество');
+    }
+    
+    public function testUserCanFindNotExistentItem()
+    {
+        $item = $this->getArchivedItem();
+        $url = $this->getItemCreateUrl($this->actualGroup);
+        $response = $this->executeQuery($url, $this->getQueryData($item->sid, $this->actualGroup->id));
+        $response->assertOk();
+        $response->assertViewIs('orders.create.new');
+        $response->assertSee('Количество');
     }
     
     protected function getQueryData(int $sid = null, int $group = null): array
@@ -72,8 +99,6 @@ class ItemTest extends BaseItem
             'group' => $group
         ];
     }
-
-    
     
     protected function executeQuery(string $url, array $data): Response
     {
@@ -82,16 +107,12 @@ class ItemTest extends BaseItem
             ->post('/item/show', $data);
     }
     
+    protected function getItemCreateUrl(int $group = NULL): string
+    {
+        return '/item/create/'.$group;
+    }
+    
 
-//
-
-//
-
-//
-
-//
-
-//
 
 
     /*protected $gropRepository;
@@ -119,46 +140,12 @@ class ItemTest extends BaseItem
 
     
 
+
     
 
-    public function testUserCanNotFindExistentItemWithoutGroupId()
-    {
-        $response = $this->executeQuery($this->actualItemUrl, $this->getQueryData($this->actualItem->sid, null));
-        $response->assertRedirect($this->actualItemUrll);
-        $response->assertSessionHasErrors('group');
-    }
+    
 
-    public function testUserCanNotFindNonExistentItem()
-    {
-        dd($this->from($this->actualItemUrl));
-        $response = $this->from($this->actualItemUrl)
-            ->authenticateByTest()
-            ->post('/item/show', [
-                'sid' => '1',
-                'group' => $this->actualItemGroup->id
-            ]);
-        $response->assertSessionHasErrors(0);
-        $this->assertTrue($response->exception instanceof \App\Exceptions\NotFoundException);
-        $response->assertRedirect('/');
-    }
-
-    public function testUserCanFindExistentItem()
-    {
-        $response = $this->executeQuery($this->actualItemUrl, $this->getQueryData($this->actualItem->sid, $this->actualItemGroup->id));
-        $response->assertOk();
-        $response->assertViewIs('orders.create.exists');
-        $response->assertSee('Количество');
-    }
-
-    public function testUserCanFindNotExistentItem()
-    {
-        $item = $this->getArchivedItem();
-        $url = $this->getItemCreateUrl($this->actualGroup);
-        $response = $this->executeQuery($url, $this->getQueryData($item->sid, $this->actualGroup->id));
-        $response->assertOk();
-        $response->assertViewIs('orders.create.new');
-        $response->assertSee('Количество');
-    }
+    
 
     
 

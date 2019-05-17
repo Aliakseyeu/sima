@@ -68,10 +68,10 @@ class BaseUser extends TestCase
         return User::count();
     }
 
-    public function getRandomUser(): User
-    {
-        return User::inRandomOrder()->first();
-    }
+//    public function getRandomUser(): User
+//    {
+//        return User::inRandomOrder()->first();
+//    }
 
     public function getUser(): User
     {
@@ -82,10 +82,11 @@ class BaseUser extends TestCase
     {
         return $this->password;
     }
-
-    public function __destruct()
+    
+    public function tearDown(): void
     {
-        $this->user->delete();
-    }
+		parent::tearDown();
+		$this->user->truncate();
+	}
 
 }
