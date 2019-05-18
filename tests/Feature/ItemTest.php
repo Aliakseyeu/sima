@@ -5,7 +5,7 @@ namespace Tests\Feature;
 
 use \Illuminate\Foundation\Testing\TestResponse as Response;
 
-class ItemTest extends BaseItem
+class ItemTest extends BaseOrder
 {
 	
     protected $url;
@@ -84,7 +84,7 @@ class ItemTest extends BaseItem
     {
         $item = $this->findItem();
         $response = $this->executeQuery(
-            $this->getItemCreateUrl($this->getGroup()), 
+            $this->getItemCreateUrl($this->getGroup()->id), 
             $this->getQueryData($item->sid, $this->getGroup()->id)
         );
         $response->assertOk();
