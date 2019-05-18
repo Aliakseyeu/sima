@@ -8,8 +8,6 @@ use \Illuminate\Foundation\Testing\TestResponse as Response;
 class ItemTest extends BaseItem
 {
 	
-	// todo last test
-
     protected $url;
     protected $itemUrl;
     
@@ -46,7 +44,7 @@ class ItemTest extends BaseItem
         );
         $response->assertRedirect($this->url);
         $response->assertSessionHasErrors('sid');
-    }
+	}
     
     public function testUserCanNotFindExistentItemWithoutGroupId()
     {
@@ -58,7 +56,7 @@ class ItemTest extends BaseItem
         $response->assertSessionHasErrors('group');
     }
     
-    public function testUserCanNotFindNonExistentItem()
+    public function testUserCanNotFindItemWithWrongSid()
     {
         $response = $this->from($this->itemUrl)
             ->actingAs($this->getUser())
@@ -84,9 +82,11 @@ class ItemTest extends BaseItem
     
     public function testUserCanFindNotExistentItem()
     {
-        $item = $this->getArchivedItem();
-        $url = $this->getItemCreateUrl($this->actualGroup);
-        $response = $this->executeQuery($url, $this->getQueryData($item->sid, $this->actualGroup->id));
+        $item = $this->findItem();
+        $response = $this->executeQuery(
+            $this->getItemCreateUrl($this->getGroup()), 
+            $this->getQueryData($item->sid, $this->getGroup()->id)
+        );
         $response->assertOk();
         $response->assertViewIs('orders.create.new');
         $response->assertSee('Количество');

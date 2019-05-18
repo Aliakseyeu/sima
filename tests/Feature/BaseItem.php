@@ -22,7 +22,7 @@ class BaseItem extends BaseGroup
 		$this->attachUser();
 	}
 	
-	protected function createItem(): Item
+	public function createItem(): Item
 	{
 		$findedItem = $this->findItem();
 		$this->order = $this->createOrder();
@@ -48,7 +48,7 @@ class BaseItem extends BaseGroup
 		}
 	}
 	
-	protected function createOrder(): Order
+	public function createOrder(): Order
 	{
 		$order = new Order();
 		$order->group_id = $this->getGroup()->id;
@@ -56,7 +56,7 @@ class BaseItem extends BaseGroup
 		return $order;
 	}
 	
-	protected function findItem(): object
+	public function findItem(): object
 	{
 		$sids = $this->getRandomSids();
 	    do{
