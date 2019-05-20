@@ -43,12 +43,17 @@ class OrderTest extends BaseOrder
         $this->getOrder()->delete();
         $response->assertRedirect('/?page=');
         $this->assertEquals(1, $this->getOrdersCount());
-        $this->assertEquals(1, ($order = $this->getLastOrder())->users->count());
-//        $this->assertEquals($this->getUser()->id, $order->users->first()->id);
-//        $this->assertEquals($item->name, $order->item->name);
-//        $this->assertEquals($item->id, $order->item->pid);
-//        $this->assertEquals($item->sid, $order->item->sid);
+        $this->assertCount(1, ($order = $this->getLastOrder())->users);
+        $this->assertEquals($this->getUser()->id, $order->users->first()->id);
+        $this->assertEquals($item->name, $order->item->name);
+        $this->assertEquals($item->id, $order->item->pid);
+        $this->assertEquals($item->sid, $order->item->sid);
     }
+    
+    public function tearDown(): void
+    {
+		parent::tearDown();
+	}
 //
 //    public function testUserCanNotStoreExistentItemWithoutId(): void
 //    {

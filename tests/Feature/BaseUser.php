@@ -8,9 +8,12 @@ use Faker;
 use App\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class BaseUser extends TestCase
 {
+	
+	use RefreshDatabase;
 
     private $user;
     private $faker;
@@ -83,10 +86,10 @@ class BaseUser extends TestCase
         return $this->password;
     }
     
-    public function tearDown(): void
-    {
-		parent::tearDown();
-		$this->user->truncate();
-	}
+//    public function tearDown(): void
+//    {
+//		parent::tearDown();
+//		$this->user->truncate();
+//	}
 
 }

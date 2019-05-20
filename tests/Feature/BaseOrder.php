@@ -8,9 +8,12 @@ use App\{
 };
 use Ixudra\Curl\Facades\Curl;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class BaseOrder extends BaseGroup
 {
+	
+	use RefreshDatabase;
 	
 	private $item;
 	private $order;
@@ -19,7 +22,7 @@ class BaseOrder extends BaseGroup
 	{
 		parent::setUp();
 		$this->item = $this->createItem();
-		$this->attachUser();
+		$this->attachUsers();
 	}
 	
 	public function createItem(): Item
@@ -36,7 +39,7 @@ class BaseOrder extends BaseGroup
 		return $item;
 	}
 	
-	public function attachUser(int $count = 1): void
+	public function attachUsers(int $count = 1): void
 	{
 		for($i = 0; $i < $count; $i++){
 			$qty = $this->getQty();
@@ -125,14 +128,25 @@ class BaseOrder extends BaseGroup
 	    return $this->order;
 	}
 	
+//	protected function truncateOrderUser(): void
+//	{
+//		foreach(\DB::table('order_user')->get() as $pivot){
+//			$pivot->delete();
+//		}
+//		if($user = $this->order->users->first() instanceof Úser){
+//			$user->pivot->truncate();
+//		}
+////		$this->attachUsers();
+//	}
+	
+	
 	public function tearDown(): void
     {
 		parent::tearDown();
+//		$this->truncateOrderUser();
 //		$this->order->users()->sync([]);
-// todo pivot truncate
-        $this->order->users->each->delete();
-		$this->order->truncate();
-		$this->item->truncate();
+//		$this->order->truncate();
+//		$this->item->truncate();
 	}
 	
 //	public function __construct()
