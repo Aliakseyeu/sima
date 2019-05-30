@@ -12,14 +12,16 @@ class StatusTableSeeder extends Seeder
      */
     public function run()
     {
-        $status = new Status();
-        $status->slug = 'new';
-        $status->name = 'Новый';
-        $status->save();
-        
-        $status = new Status();
-        $status->slug = 'archived';
-        $status->name = 'Архивный';
-        $status->save();
+        $this->saveStatus('new', 'Новый');
+        $this->saveStatus('archived', 'Архивный');
+        $this->saveStatus('archived111', 'Архивный');
     }
+    
+    protected function saveStatus(string $slug, string $name): void
+    {
+		$status = new Status();
+        $status->slug = $slug;
+        $status->name = $name;
+        $status->save();
+	}
 }

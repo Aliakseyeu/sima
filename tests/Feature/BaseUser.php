@@ -9,11 +9,13 @@ use App\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class BaseUser extends TestCase
 {
 	
 	use RefreshDatabase;
+	use DatabaseMigrations;
 
     private $user;
     private $faker;
@@ -22,6 +24,7 @@ class BaseUser extends TestCase
     public function setUp()
     {
     	parent::setUp();
+    	$this->artisan('db:seed', ['--env'=>'testing']);
         $this->faker = Faker\Factory::create('ru_RU');
         $this->user = $this->createUser();
     }

@@ -8,19 +8,22 @@ use App\{
 };
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class BaseGroup extends BaseUser
 {
 	
 	use RefreshDatabase;
+	// use DatabaseMigrations;
 	
 	private $group;
 	
 	public function setUp(): void
 	{
 		parent::setUp();
-		$this->group = new Group();
-		$this->group->save();
+//		$this->group = new Group();
+//		$this->group->save();
+        $this->group = Group::first();
 	}
 	
 	public function getGroup(): Group

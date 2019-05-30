@@ -2,7 +2,7 @@
 
 @section('content')
 
-@if(!empty($news))
+@if(!empty($news) && $news->count() > 0)
     <div class="alert alert-info" role="alert">
         <ul>
             @foreach($news as $new)

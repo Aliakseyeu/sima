@@ -9,11 +9,13 @@ use App\{
 use Ixudra\Curl\Facades\Curl;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class BaseOrder extends BaseGroup
 {
 	
 	use RefreshDatabase;
+	// use DatabaseMigrations;
 	
 	private $item;
 	private $order;
