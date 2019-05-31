@@ -15,7 +15,7 @@ class BaseUser extends TestCase
 {
 	
 	use RefreshDatabase;
-	use DatabaseMigrations;
+//	use DatabaseMigrations;
 
     private $user;
     private $faker;
@@ -24,6 +24,7 @@ class BaseUser extends TestCase
     public function setUp()
     {
     	parent::setUp();
+    	$this->artisan('migrate', ['--env'=>'testing']);
     	$this->artisan('db:seed', ['--env'=>'testing']);
         $this->faker = Faker\Factory::create('ru_RU');
         $this->user = $this->createUser();
