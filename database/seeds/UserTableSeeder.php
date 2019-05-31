@@ -12,7 +12,6 @@ class UserTableSeeder extends Seeder
      */
     public function run()
     {
-        $faker = Faker\Factory::create('ru_RU');
         factory(User::class, 10)->create();
         User::findOrFail(1)->roles()->attach(Role::whereSlug('admin')->first());
     }

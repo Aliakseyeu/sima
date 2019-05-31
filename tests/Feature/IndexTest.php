@@ -2,14 +2,13 @@
 
 namespace Tests\Feature;
 
+use Tests\TestCase;
 
-class IndexTest extends BaseUser
+class IndexTest extends TestCase
 {
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
+
+    use Traits\DbPreparingTrait;
+
     public function testIsIndexPageAvailable()
     {
         $response = $this->get('/');
