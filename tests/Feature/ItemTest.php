@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
-
+use Tests\Support\Prepare;
+use Tests\Support\ItemTrait;
+use Tests\Support\UserTrait;
 use \Illuminate\Foundation\Testing\TestResponse as Response;
 
 class ItemTest extends BaseOrder

@@ -3,7 +3,7 @@
 use App\Status;
 use Illuminate\Database\Seeder;
 
-class StatusTableSeeder extends Seeder
+class StatusesTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,7 +14,6 @@ class StatusTableSeeder extends Seeder
     {
         $this->saveStatus('new', 'Новый');
         $this->saveStatus('archived', 'Архивный');
-        $this->saveStatus('archived111', 'Архивный');
     }
     
     protected function saveStatus(string $slug, string $name): void

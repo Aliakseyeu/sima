@@ -3,7 +3,7 @@
 use App\{Role, User};
 use Illuminate\Database\Seeder;
 
-class UserTableSeeder extends Seeder
+class UsersTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -13,6 +13,6 @@ class UserTableSeeder extends Seeder
     public function run()
     {
         factory(User::class, 10)->create();
-        User::findOrFail(1)->roles()->attach(Role::whereSlug('admin')->first());
+        User::latest()->first()->roles()->attach(Role::whereSlug('admin')->first());
     }
 }
