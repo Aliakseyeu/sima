@@ -2,17 +2,16 @@
 
 namespace Tests\Feature;
 
+use Tests\Support\Prepare;
+use Tests\Support\UserTrait;
 use \Illuminate\Foundation\Testing\TestResponse as Response;
 
-class RegisterTest extends BaseUser
+class RegisterTest extends Prepare
 {
 
-    protected $registerUrl = '/register';
+    use UserTrait;
 
-    public function setUp()
-    {
-        parent::setUp();
-    }
+    protected $registerUrl = '/register';
 
     public function testIsRegisterPageAvailable(): void
     {
@@ -22,10 +21,11 @@ class RegisterTest extends BaseUser
 
     public function testUserCanRegister(): void
     {
+        $this->getUser()->delete();
         $response = $this->post($this->registerUrl, $data = $this->getRegisterData());
         $response->assertRedirect('/');
-        $this->assertEquals(1, $this->getUsersCount());
-        $this->assertAuthenticatedAs($user = $this->findUsersByEmail()->first());
+        $this->assertEquals($this->getUsersCount(), $this->getActualUsersCount());
+        $this->assertAuthenticatedAs($user = $this->getUserByEmail());
         $this->assertEquals($data['name'], $user->name);
         $this->assertEquals($data['surname'], $user->surname);
         $this->assertEquals($data['email'], $user->email);
@@ -42,10 +42,8 @@ class RegisterTest extends BaseUser
 
     public function testUserCanNotRegisterWithRegisteredEmail(): void
     {
-    	$registeredUser = $this->createUser();
         $response = $this->from($this->registerUrl)
-            ->post($this->registerUrl, $this->mergeRegisterData(['email' => $registeredUser->email]));
-        $registeredUser->delete();
+            ->post($this->registerUrl, $this->mergeRegisterData(['email' => $this->getUser()->email]));
         $this->isUserNotRegistered($response, 'email');
     }
 
@@ -71,7 +69,7 @@ class RegisterTest extends BaseUser
     protected function isUserNotRegistered(Response $response, string $errorKey): void
     {
         $response->assertRedirect($this->registerUrl);
-        $this->assertEquals(0, $this->getUsersCount());
+        $this->assertEquals($this->getUsersCount(), $this->getActualUsersCount());
         $response->assertSessionHasErrors($errorKey);
         $this->assertGuest();
     }

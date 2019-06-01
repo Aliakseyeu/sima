@@ -2,6 +2,7 @@
 
 namespace Tests\Support;
 
+use Hash;
 use App\User;
 
 trait UserTrait
@@ -16,6 +17,27 @@ trait UserTrait
         $this->admin = User::findOrFail(1);
         $this->user = User::findOrFail(2);
         $this->count = $this->getActualUsersCount();
+    }
+
+    public function getRegisterData(): array
+    {
+        return array_merge(
+            $this->user->toArray(),
+            [
+                'password' => $this->getPassword(),
+                'password_confirmation' => $this->getPassword()
+            ]
+        );
+    }
+
+    public function getUserByEmail(): User
+    {
+        return User::whereEmail($this->user->email)->first();
+    }
+
+    public function checkPasswords(string $password, string $hash): bool
+    {
+        return Hash::check($password, $hash);
     }
 
     public function getActualUsersCount(): int

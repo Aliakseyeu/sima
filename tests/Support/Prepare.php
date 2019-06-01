@@ -9,14 +9,30 @@
 namespace Tests\Support;
 
 use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class Prepare extends TestCase
 {
+
+    use RefreshDatabase;
 
     public function setUp()
     {
         parent::setUp();
 
+        $this->runArtisan();
+        $this->runTraits();
+    }
+
+    protected function runArtisan(): void
+    {
+        $this->artisan('migrate:refresh', ['--env'=>'testing']);
+        $this->artisan('db:seed', ['--env'=>'testing']);
+    }
+
+    protected function runTraits(): void
+    {
         $uses = array_flip(class_uses_recursive(static::class));
 
         if (isset($uses[UserTrait::class])) {

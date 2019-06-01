@@ -2,8 +2,13 @@
 
 namespace Tests\Feature;
 
-class LogoutTest extends BaseUser
+use Tests\Support\Prepare;
+use Tests\Support\UserTrait;
+
+class LogoutTest extends Prepare
 {
+
+    use UserTrait;
 
     public function testNotAuthenticatedUserCanNotLogout(): void
     {

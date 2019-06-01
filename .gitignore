@@ -17,3 +17,4 @@ yarn-error.log
 sftp-config.json
 sima_clcs.csprj
 sima.clpprj
+/nbproject/private/

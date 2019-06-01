@@ -2,19 +2,11 @@
 
 namespace Tests\Feature;
 
-//use Tests\Feature\Traits\DbPreparingTrait;
 use Tests\Support\Prepare;
-use Tests\TestCase;
 use Tests\Support\UserTrait;
 
 class LoginTest extends Prepare
 {
-
-//    use Traits\DbPreparingTrait{
-//        DbPreparingTrait::dbPreparingTrait as private __traitConstruct;
-//    }
-//    use DbPreparingTrait;
-//    use Traits\UserTrait;
 
     use UserTrait;
 
