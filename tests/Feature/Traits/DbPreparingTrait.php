@@ -8,11 +8,17 @@
 
 namespace Tests\Feature\Traits;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 trait DbPreparingTrait
 {
+    use RefreshDatabase{
+        RefreshDatabase::refreshDatabase as protected __rdConstruct;
+    }
+
     public function dbPreparingTrait()
     {
+        $this->__rdConstruct();
         $this->artisan('migrate', ['--env'=>'testing']);
         $this->artisan('db:seed', ['--env'=>'testing']);
     }

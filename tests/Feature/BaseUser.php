@@ -2,32 +2,22 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 
-use Faker;
 use App\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 
-class BaseUser extends TestCase
+
+class BaseUser extends PrepareDatabase
 {
-	
-	use RefreshDatabase;
-//	use DatabaseMigrations;
 
+    private $admin;
     private $user;
-    private $faker;
-    private $password = 'super-password';
 
     public function setUp()
     {
     	parent::setUp();
-    	$this->artisan('migrate', ['--env'=>'testing']);
-    	$this->artisan('db:seed', ['--env'=>'testing']);
-        $this->faker = Faker\Factory::create('ru_RU');
-        $this->user = $this->createUser();
+    	$this->user = User::findOrFail(2);
     }
 
     public function createUser(): User
