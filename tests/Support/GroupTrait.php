@@ -1,17 +1,15 @@
 <?php
 
-namespace Tests\Feature\Support;
+namespace Tests\Support;
 
 use App\Group;
-// use Ixudra\Curl\Facades\Curl;
-// use Illuminate\Database\Eloquent\Collection;
 
-trait ItemTrait
+trait GroupTrait
 {
 
     private $group;
 
-    public function orderTrait(): void
+    public function groupTrait(): void
     {
         $this->group = Group::first();
     }

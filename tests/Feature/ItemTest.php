@@ -2,25 +2,22 @@
 
 namespace Tests\Feature;
 
-use Tests\Support\Prepare;
-use Tests\Support\OrderTrait;
-use Tests\Support\UserTrait;
+use Tests\Support\{Prepare, GroupTrait, ItemTrait, UserTrait};
 use \Illuminate\Foundation\Testing\TestResponse as Response;
 
 class ItemTest extends Prepare
 {
 
-    use OrderTrait;
     use UserTrait;
+    use GroupTrait;
+    use ItemTrait;
 	
     protected $url;
-    protected $itemUrl;
     
     public function setUp(): void
     {
         parent::setUp();
         $this->url = $this->getItemCreateUrl($this->getGroup()->id);
-        // $this->itemUrl = $this->getItemCreateUrl($this->getItem()->order->group->id);
     }
 
     public function testNotAuthenticatedUserCanNotSeeItemSearchPage(): void
@@ -51,51 +48,39 @@ class ItemTest extends Prepare
         $response->assertSessionHasErrors('sid');
 	}
     
-    public function testUserCanNotFindExistentItemWithoutGroupId()
+    public function testUserCanNotFindItemWithoutGroupId()
     {
         $response = $this->executeQuery(
-            $this->itemUrl, 
+            $this->url, 
             $this->getQueryData($this->getItem()->sid, null)
         );
-        $response->assertRedirect($this->itemUrl);
+        $response->assertRedirect($this->url);
         $response->assertSessionHasErrors('group');
     }
     
- //    public function testUserCanNotFindItemWithWrongSid()
- //    {
- //        $response = $this->from($this->itemUrl)
- //            ->actingAs($this->getUser())
- //            ->post('/item/show', [
- //                'sid' => '1',
- //                'group' => $this->getItem()->order->group->id
- //            ]);
- //        $response->assertSessionHasErrors(0);
- //        $this->assertTrue($response->exception instanceof \App\Exceptions\NotFoundException);
- //        $response->assertRedirect('/');
- //    }
+    public function testUserCanNotFindItemWithWrongSid()
+    {
+        $response = $this->from($this->url)
+            ->actingAs($this->getUser())
+            ->post('/item/show', [
+                'sid' => '1',
+                'group' => $this->getGroup()->id
+            ]);
+        $response->assertSessionHasErrors(0);
+        $this->assertTrue($response->exception instanceof \App\Exceptions\NotFoundException);
+        $response->assertRedirect('/');
+    }
     
- //    public function testUserCanFindExistentItem()
- //    {
- //        $response = $this->executeQuery(
- //            $this->itemUrl, 
- //            $this->getQueryData($this->getItem()->sid, $this->getItem()->order->group->id)
- //        );
- //        $response->assertOk();
- //        $response->assertViewIs('orders.create.exists');
- //        $response->assertSee('Количество');
- //    }
-    
- //    public function testUserCanFindNotExistentItem()
- //    {
- //        $item = $this->findItem();
- //        $response = $this->executeQuery(
- //            $this->getItemCreateUrl($this->getGroup()->id), 
- //            $this->getQueryData($item->sid, $this->getGroup()->id)
- //        );
- //        $response->assertOk();
- //        $response->assertViewIs('orders.create.new');
- //        $response->assertSee('Количество');
- //    }
+    public function testUserCanFindItem()
+    {
+        $response = $this->executeQuery(
+            $this->url, 
+            $this->getQueryData($this->getItem()->sid, $this->getGroup()->id)
+        );
+        $response->assertOk();
+        $response->assertViewIs('orders.create.exists');
+        $response->assertSee('Количество');
+    }
     
     protected function getQueryData(int $sid = null, int $group = null): array
     {
@@ -117,44 +102,4 @@ class ItemTest extends Prepare
         return '/item/create/'.$group;
     }
     
-
-
-
-    /*protected $gropRepository;
-    protected $itemRepository;
-    protected $userRepository;
-
-    protected $actualGroup;
-    protected $actualUrl;
-    protected $actualItem;
-    protected $actualItemGroup;
-    protected $actualItemUrl;
-
-    public function __construct()
-    {
-        $this->groupRepository = new GroupRepository();
-        $this->itemRepository = new ItemRepository();
-        $this->userRepository = new UserRepository();
-
-        $this->actualGroup = $this->groupRepository->getActualGroup();
-        $this->actualUrl = $this->getItemCreateUrl($this->actualGroup);
-        $this->actualItem = $this->itemRepository->getActualItem();
-        $this->actualItemGroup = $this->actualItem->order->group;
-        $this->actualItemUrl = $this->getItemCreateUrl($this->actualItemGroup);
-    }
-
-    
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    */
 }

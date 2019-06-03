@@ -39,8 +39,12 @@ class Prepare extends TestCase
             $this->userTrait();
         }
 
-        if (isset($uses[OrderTrait::class])) {
-            $this->orderTrait();
+        if (isset($uses[GroupTrait::class])) {
+            $this->groupTrait();
+        }
+
+        if (isset($uses[ItemTrait::class])) {
+            $this->itemTrait();
         }
     }
 
