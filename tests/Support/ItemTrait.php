@@ -18,5 +18,10 @@ trait ItemTrait
     {
         return $this->item;
     }
+
+    public function getItemById(int $id): Item
+    {
+        return Item::findOrFail($id);
+    }
     
 }

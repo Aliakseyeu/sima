@@ -7,14 +7,13 @@ class OrdersTableSeeder extends Seeder
 
     public function run()
     {
-        factory(App\Order::class, 5)->create()->each(function($item){
-            $count = rand(1, 5);
-            for($i = 1; $i <= $count; $i++){
+        factory(App\Order::class, 5)->create()->each(function($item, $key){
+            for($i = 0; $i <= $key; $i++){
                 $item->users()->attach(
                     App\User::inRandomOrder()->first(),
                     [
-                        'qty'=>7,
-                        'delivery'=>10,
+                        'qty'=>rand(1, 10),
+                        'delivery'=>rand(10, 50),
                         'delivery_info'=>json_encode((object)[])
                     ]
                 );

@@ -41,7 +41,6 @@ class ItemTest extends Prepare
     public function testUserCanNotFindItemWithoutSid(): void
     {
         $response = $this->executeQuery(
-            $this->url, 
             $this->getQueryData(null, $this->getGroup()->id)
         );
         $response->assertRedirect($this->url);
@@ -51,7 +50,6 @@ class ItemTest extends Prepare
     public function testUserCanNotFindItemWithoutGroupId()
     {
         $response = $this->executeQuery(
-            $this->url, 
             $this->getQueryData($this->getItem()->sid, null)
         );
         $response->assertRedirect($this->url);
@@ -60,13 +58,7 @@ class ItemTest extends Prepare
     
     public function testUserCanNotFindItemWithWrongSid()
     {
-        $response = $this->from($this->url)
-            ->actingAs($this->getUser())
-            ->post('/item/show', [
-                'sid' => '1',
-                'group' => $this->getGroup()->id
-            ]);
-        $response->assertSessionHasErrors(0);
+        $response = $this->executeQuery($this->getQueryData(1, $this->getGroup()->id));
         $this->assertTrue($response->exception instanceof \App\Exceptions\NotFoundException);
         $response->assertRedirect('/');
     }
@@ -74,7 +66,6 @@ class ItemTest extends Prepare
     public function testUserCanFindItem()
     {
         $response = $this->executeQuery(
-            $this->url, 
             $this->getQueryData($this->getItem()->sid, $this->getGroup()->id)
         );
         $response->assertOk();
@@ -90,9 +81,9 @@ class ItemTest extends Prepare
         ];
     }
     
-    protected function executeQuery(string $url, array $data): Response
+    protected function executeQuery(array $data): Response
     {
-        return $this->from($url)
+        return $this->from($this->url)
             ->actingAs($this->getUser())
             ->post('/item/show', $data);
     }

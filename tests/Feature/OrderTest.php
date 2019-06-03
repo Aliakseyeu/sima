@@ -2,11 +2,15 @@
 
 namespace Tests\Feature;
 
-use App\Order;
-use App\Group;
+use Tests\Support\{Prepare, GroupTrait, ItemTrait, OrderTrait, UserTrait};
+use \Illuminate\Foundation\Testing\TestResponse as Response;
 
-class OrderTest extends BaseOrder
+class OrderTest extends Prepare
 {
+
+    use UserTrait;
+    use ItemTrait;
+    use OrderTrait;
 	
 	protected $url = '/item/show';
     
@@ -18,15 +22,16 @@ class OrderTest extends BaseOrder
 
     public function testUserCanStoreExistentItem(): void
     {
-    	$user = $this->createUser();
-        $this->assertNotContains($user->id, $this->getItem()->order->users->pluck('id'));
-        $response = $this->actingAs($user)
+        $this->assertNotContains($this->getUser()->id, $this->getItem()->order->users->pluck('id'));
+        $response = $this->actingAs($this->getUser())
             ->from($this->url)
             ->post('/order/store_exists', [
                 'id' => $this->getItem()->order->id,
                 'qty' => $this->getQty()
             ]);
-        $response->assertRedirect('/?page=');
+        // $response->assertRedirect('/?page=');
+        $response->assertOk();
+        $response->assertSee('Заказ успешно создан(а)');
         $this->assertCount(
             $this->getItem()->order->users->count() + 1, 
             $this->getItemById($this->getItem()->id)->order->users
@@ -35,13 +40,14 @@ class OrderTest extends BaseOrder
 
     public function testUserCanStoreNewItem(): void
     {
-        $this->getOrder()->delete();
-        $item = $this->findItem();
+        /////////////
+        $this->getItem()->order()->delete();
+        // $item = $this->findItem();
         $response = $this->actingAs($this->getUser())
             ->followingRedirects()
             ->from($this->url)
             ->post('/order/store_new', [
-                'id' => $item->id,
+                'id' => $this->getItem()->id,
                 'group' => $this->getGroup()->id,
                 'qty' => $qty = $this->getQty()
             ]);
@@ -55,18 +61,30 @@ class OrderTest extends BaseOrder
         $this->assertEquals($item->sid, $order->item->sid);
     }
 
-   public function testUserCanNotStoreExistentItemWithoutId(): void
-   {
-       $this->assertNotContains($this->getUser()->id, $this->getItem()->order->users->pluck('id'));
-       $response = $this->actingAs($this->getUser())
-           ->from($this->url)
-           ->post('/order/store_exists', [
-               'qty' => 7
-           ]);
-       $response->assertRedirect($url);
-       $this->assertCount($item->order->users->count(), $this->findItem($item->id)->order->users);
-       $response->assertSessionHasErrors('id');
-   }
+   // public function testUserCanNotStoreExistentItemWithoutId(): void
+   // {
+   //     $this->assertNotContains($this->getUser()->id, $this->getItem()->order->users->pluck('id'));
+   //     $response = $this->actingAs($this->getUser())
+   //         ->from($this->url)
+   //         ->post('/order/store_exists', [
+   //             'qty' => 7
+   //         ]);
+   //     $response->assertRedirect($url);
+   //     $this->assertCount($item->order->users->count(), $this->findItem($item->id)->order->users);
+   //     $response->assertSessionHasErrors('id');
+   // }
+
+
+
+
+
+
+
+
+
+
+
+
 //
 //    public function testUserCanNotStoreExistentItemWithoutQty(): void
 //    {
