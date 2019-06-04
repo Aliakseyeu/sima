@@ -2,7 +2,7 @@
 
 namespace Tests\Support;
 
-use App\Group;
+use App\{Group, Status};
 
 trait GroupTrait
 {
@@ -12,6 +12,11 @@ trait GroupTrait
     public function groupTrait(): void
     {
         $this->group = Group::first();
+    }
+
+    public function groupToArchive(): void
+    {
+        $this->group->status()->associate(Status::whereSlug('archived')->first())->save();
     }
 
     public function getGroup(): Group

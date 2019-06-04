@@ -10,7 +10,7 @@ class OrdersTableSeeder extends Seeder
         factory(App\Order::class, 5)->create()->each(function($item, $key){
             for($i = 0; $i <= $key; $i++){
                 $item->users()->attach(
-                    App\User::inRandomOrder()->first(),
+                    App\User::findOrFail($i+3),
                     [
                         'qty'=>rand(1, 10),
                         'delivery'=>rand(10, 50),

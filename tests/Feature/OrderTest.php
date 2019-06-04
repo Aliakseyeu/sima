@@ -4,15 +4,20 @@ namespace Tests\Feature;
 
 use Tests\Support\{Prepare, GroupTrait, ItemTrait, OrderTrait, UserTrait};
 use \Illuminate\Foundation\Testing\TestResponse as Response;
+use Illuminate\Support\Collection;
 
 class OrderTest extends Prepare
 {
 
     use UserTrait;
+    use GroupTrait;
     use ItemTrait;
     use OrderTrait;
 	
 	protected $url = '/item/show';
+    protected $storeExistsUrl = '/order/store_exists';
+    protected $storeNewUrl = '/order/store_new';
+    protected $destroyUrl = '/order/destroy/';
     
     public function testUserCanNotSeeItemShowPageWithoutSearch(): void
     {
@@ -22,38 +27,33 @@ class OrderTest extends Prepare
 
     public function testUserCanStoreExistentItem(): void
     {
-        $this->assertNotContains($this->getUser()->id, $this->getItem()->order->users->pluck('id'));
+        $this->assertTrue($this->isUserNotInOrder());
         $response = $this->actingAs($this->getUser())
             ->from($this->url)
-            ->post('/order/store_exists', [
+            ->followingRedirects()
+            ->post($this->storeExistsUrl, [
                 'id' => $this->getItem()->order->id,
                 'qty' => $this->getQty()
             ]);
-        // $response->assertRedirect('/?page=');
         $response->assertOk();
         $response->assertSee('Заказ успешно создан(а)');
-        $this->assertCount(
-            $this->getItem()->order->users->count() + 1, 
-            $this->getItemById($this->getItem()->id)->order->users
-        );
+        $this->assertCount($this->getOrderUsersCount() + 1, $this->getNewOrderUsers());
     }
 
     public function testUserCanStoreNewItem(): void
     {
-        /////////////
-        $this->getItem()->order()->delete();
-        // $item = $this->findItem();
+        $item = $this->getActualItem();
         $response = $this->actingAs($this->getUser())
             ->followingRedirects()
             ->from($this->url)
-            ->post('/order/store_new', [
-                'id' => $this->getItem()->id,
+            ->post($this->storeNewUrl, [
+                'id' => $item->id,
                 'group' => $this->getGroup()->id,
                 'qty' => $qty = $this->getQty()
             ]);
         $response->assertOk();
         $response->assertSee('Заказ успешно создан(а)');
-        $this->assertEquals(1, $this->getOrdersCount());
+        $this->assertEquals($this->getOrdersCount() + 1, $this->getActualOrdersCount());
         $this->assertCount(1, ($order = $this->getLastOrder())->users);
         $this->assertEquals($this->getUser()->id, $order->users->first()->id);
         $this->assertEquals($item->name, $order->item->name);
@@ -61,230 +61,235 @@ class OrderTest extends Prepare
         $this->assertEquals($item->sid, $order->item->sid);
     }
 
-   // public function testUserCanNotStoreExistentItemWithoutId(): void
-   // {
-   //     $this->assertNotContains($this->getUser()->id, $this->getItem()->order->users->pluck('id'));
-   //     $response = $this->actingAs($this->getUser())
-   //         ->from($this->url)
-   //         ->post('/order/store_exists', [
-   //             'qty' => 7
-   //         ]);
-   //     $response->assertRedirect($url);
-   //     $this->assertCount($item->order->users->count(), $this->findItem($item->id)->order->users);
-   //     $response->assertSessionHasErrors('id');
-   // }
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//    public function testUserCanNotStoreExistentItemWithoutQty(): void
-//    {
-//        $url = '/item/show';
-//        $this->removeTestUserOrders();
-//        $item = $this->getActualItem();
-//        $this->assertNotContains($this->getTestUser()->first()->id, $item->order->users->pluck('id'));
-//        $response = $this->authenticateByTest()
-//            ->from($url)
-//            ->post('/order/store_exists', [
-//                'id' => $item->order->id,
-//            ]);
-//        $response->assertRedirect($url);
-//        $this->assertCount($item->order->users->count(), $this->findItem($item->id)->order->users);
-//        $response->assertSessionHasErrors('qty');
-//    }
-//
-//    public function testUserCanNotStoreExistentItemWithWrongId(): void
-//    {
-//        $this->removeTestUserOrders();
-//        $item = $this->getActualItem();
-//        $this->assertNotContains($this->getTestUser()->first()->id, $item->order->users->pluck('id'));
-//        $response = $this->authenticateByTest()
-//            ->from('/item/show')
-//            ->post('/order/store_exists', [
-//                'id' => 0,
-//                'qty' => 7
-//            ]);
-//        $response->assertRedirect('/');
-//        $this->assertCount($item->order->users->count(), $this->findItem($item->id)->order->users);
-//        $this->assertTrue($response->exception instanceof \Illuminate\Database\Eloquent\ModelNotFoundException);
-//    }
-//
-//    public function testUserCanNotStoreNewItemWithoutId(): void
-//    {
-//        $url = '/item/show';
-//        $this->removeTestUserOrders();
-//        $user = $this->getTestUser()->first();
-//        $items = $this->getLastItems();
-//        $response = $this->authenticateByTest()
-//            ->from($url)
-//            ->post('/order/store_new', [
-//                'group' => $this->getActualGroup()->id,
-//                'qty' => 7
-//            ]);
-//        $response->assertRedirect($url);
-//        $this->assertEquals($items, $this->getLastItems());
-//        $response->assertSessionHasErrors('id');
-//    }
-//
-//    public function testUserCanNotStoreNewItemWithWrongId(): void
-//    {
-//        $this->removeTestUserOrders();
-//        $user = $this->getTestUser()->first();
-//        $items = $this->getLastItems();
-//        $response = $this->authenticateByTest()
-//            ->from('/item/show')
-//            ->post('/order/store_new', [
-//                'id' => 0,
-//                'group' => $this->getActualGroup()->id,
-//                'qty' => 7
-//            ]);
-//        $response->assertRedirect('/');
-//        $this->assertEquals($items, $this->getLastItems());
-//        $this->assertTrue($response->exception instanceof \App\Exceptions\NotFoundException);
-//    }
-//
-//    public function testUserCanNotStoreNewItemWithoutGroup(): void
-//    {
-//        $url = '/item/show';
-//        $this->removeTestUserOrders();
-//        $user = $this->getTestUser()->first();
-//        $items = $this->getLastItems();
-//        $response = $this->authenticateByTest()
-//            ->from($url)
-//            ->post('/order/store_new', [
-//                'id' => $this->getArchivedItem()->pid,
-//                'qty' => 7
-//            ]);
-//        $response->assertRedirect($url);
-//        $this->assertEquals($items, $this->getLastItems());
-//        $response->assertSessionHasErrors('group');
-//    }
-//
-//    public function testUserCanNotStoreNewItemWithoutQty(): void
-//    {
-//        $url = '/item/show';
-//        $this->removeTestUserOrders();
-//        $user = $this->getTestUser()->first();
-//        $items = $this->getLastItems();
-//        $response = $this->authenticateByTest()
-//            ->from($url)
-//            ->post('/order/store_new', [
-//                'id' => $this->getArchivedItem()->pid,
-//                'group' => $this->getActualGroup()->id,
-//            ]);
-//        $response->assertRedirect($url);
-//        $this->assertEquals($items, $this->getLastItems());
-//        $response->assertSessionHasErrors('qty');
-//    }
-//
-//    public function testUserCanNotStoreNewItemWithWrongGroup(): void
-//    {
-//        $this->removeTestUserOrders();
-//        $user = $this->getTestUser()->first();
-//        $items = $this->getLastItems();
-//        $response = $this->authenticateByTest()
-//            ->from('/item/show')
-//            ->post('/order/store_new', [
-//                'id' => $this->getArchivedItem()->pid,
-//                'group' => 0,
-//                'qty' => 7
-//            ]);
-//        $response->assertRedirect('/');
-//        $this->assertEquals($items, $this->getLastItems());
-//        $this->assertTrue($response->exception instanceof \Illuminate\Database\Eloquent\ModelNotFoundException);
-//    }
-//
-//    public function testUserCanNotStoreNewItemInArchivedGroup(): void
-//    {
-//        $this->removeTestUserOrders();
-//        $user = $this->getTestUser()->first();
-//        $items = $this->getLastItems();
-//        $response = $this->authenticateByTest()
-//            ->from('/item/show')
-//            ->post('/order/store_new', [
-//                'id' => $this->getArchivedItem()->pid,
-//                'group' => $this->getLastArchivedGroups()->first()->id,
-//                'qty' => 7
-//            ]);
-//        $response->assertRedirect('/');
-//        $this->assertEquals($items, $this->getLastItems());
-//        $this->assertTrue($response->exception instanceof \Illuminate\Database\Eloquent\ModelNotFoundException);
-//    }
-//
-//    public function testNotAuthtedUserCanNotSeeOrderDestroyBtn(): void
-//    {
-//        $response = $this->get('/');
-//        $response->assertDontSee('Удалить');
-//    }
-//
-//    public function testNotAuthtedUserCanNotDestroyOrder(): void
-//    {
-//        $usersOrder = $this->getUsersOrderPivot();
-//        $response = $this->get('/order/destroy/'.$usersOrder->id);
-//        $this->assertEquals($usersOrder, $this->getUsersOrderPivot());
-//        $response->assertRedirect('/login');
-//    }
-//
-//    public function testNotAuthorizedUserCanNotDestroyOrder(): void
-//    {
-//        $usersOrder = $this->getUsersOrderPivot();
-//        $response = $this->actingAs($this->getOrdinaryRoleUser())->get('/order/destroy/'.$usersOrder->id);
-//        $this->assertEquals($usersOrder, $this->getUsersOrderPivot());
-//        $response->assertRedirect('/');
-//    }
-
-    /*public function testAuthorizedUserCanDestroySingleUserOrder(): void
+    public function testUserCanNotStoreExistentItemWithoutId(): void
     {
-        $existentOrder = $this->getSingleUserOrder();
-        $existentItem = $existentOrder->item;
-        $existentPivot = $existentOrder->users->first()->pivot;
-        $response = $this->actingAs($this->getAdminRoleUser())->get('/order/destroy/'.$existentPivot->id);
-        $removedOrder = $this->getSingleUserOrder();
-        $this->assertNotEquals($existentOrder, $removedOrder);
-        $this->assertNotEquals($existentItem, $removedOrder->item);
-        $this->assertNotEquals($existentPivot, $removedOrder->users->first()->pivot);
-        $response->assertRedirect('/');
-        $this->restoreSingleUserOrder($existentOrder, $existentItem, $existentPivot);
+        $this->assertTrue($this->isUserNotInOrder());
+        $response = $this->actingAs($this->getUser())
+            ->from($this->url)
+            ->post($this->storeExistsUrl, [
+                'qty' => $this->getQty()
+            ]);
+        $response->assertRedirect($this->url);
+        $this->isNoNewUsersIsOrder();
+        $response->assertSessionHasErrors('id');
     }
 
-    public function testAdminUserCanDestroyMultipleUsersOrder(): void
+    public function testUserCanNotStoreExistentItemWithoutQty(): void
     {
-        $existentOrder = $this->getMultipleUsersOrder();
-        $existentPivot = $existentOrder->users->first()->pivot;
-        $response = $this->actingAs($this->getAdminRoleUser())->get('/order/destroy/'.$existentPivot->id);
-        $this->assertNotEquals($existentPivot, $this->getMultipleUsersOrder()->users->first()->pivot);
-        $response->assertRedirect('/');
-        $this->restoreMultipleUsersOrder($existentOrder, $existentPivot);
+        $this->assertTrue($this->isUserNotInOrder());
+        $response = $this->actingAs($this->getUser())
+            ->from($this->url)
+            ->post($this->storeExistsUrl, [
+                'id' => $this->getItem()->order->id,
+            ]);
+        $response->assertRedirect($this->url);
+        $this->isNoNewUsersIsOrder();
+        $response->assertSessionHasErrors('qty');
     }
 
-    public function testUserCanDestroySelfOrder(): void
+    public function testUserCanNotStoreExistentItemWithWrongId(): void
     {
-        $existentOrder = $this->getMultipleUsersOrder();
-        $existentPivot = $existentOrder->users->first()->pivot;
-        $response = $this->actingAs($existentOrder->users->first())->get('/order/destroy/'.$existentPivot->id);
-        $this->assertNotEquals($existentPivot, $this->getMultipleUsersOrder()->users->first()->pivot);
+        $this->assertTrue($this->isUserNotInOrder());
+        $response = $this->actingAs($this->getUser())
+            ->from($this->url)
+            ->post($this->storeExistsUrl, [
+                'id' => 0,
+                'qty' => $this->getQty()
+            ]);
         $response->assertRedirect('/');
-        $this->restoreMultipleUsersOrder($existentOrder, $existentPivot);
+        $this->isNoNewUsersIsOrder();
+        $this->assertTrue($response->exception instanceof \Illuminate\Database\Eloquent\ModelNotFoundException);
     }
 
-    public function testUserCanNotDestroyArchivedOrder(): void
+    public function testUserCanNotStoreNewItemWithoutId(): void
     {
-        $archivedPivot = $this->getArchivedItem()->order->users->first()->pivot;
-        $response = $this->actingAs($this->getAdminRoleUser())->get('/order/destroy/'.$archivedPivot->id);
-        $this->assertEquals($archivedPivot, $this->getArchivedItem()->order->users->first()->pivot);
+        $response = $this->actingAs($this->getUser())
+            ->from($this->url)
+            ->post($this->storeNewUrl, [
+                'group' => $this->getGroup()->id,
+                'qty' => $this->getQty()
+            ]);
+        $response->assertRedirect($this->url);
+        $this->isOrdersCountNotChanged();
+        $response->assertSessionHasErrors('id');
+    }
+
+    public function testUserCanNotStoreNewItemWithWrongId(): void
+    {
+        $response = $this->actingAs($this->getUser())
+            ->from($this->url)
+            ->post($this->storeNewUrl, [
+                'id' => 0,
+                'group' => $this->getGroup()->id,
+                'qty' => $this->getQty()
+            ]);
+        $response->assertRedirect('/');
+        $this->isOrdersCountNotChanged();
+        $this->assertTrue($response->exception instanceof \App\Exceptions\NotFoundException);
+    }
+
+    public function testUserCanNotStoreNewItemWithoutGroup(): void
+    {
+        $response = $this->actingAs($this->getUser())
+            ->from($this->url)
+            ->post($this->storeNewUrl, [
+                'id' => $this->getActualItem()->id,
+                'qty' => $this->getQty()
+            ]);
+        $response->assertRedirect($this->url);
+        $this->isOrdersCountNotChanged();
+        $response->assertSessionHasErrors('group');
+    }
+
+    public function testUserCanNotStoreNewItemWithoutQty(): void
+    {
+        $response = $this->actingAs($this->getUser())
+            ->from($this->url)
+            ->post($this->storeNewUrl, [
+                'id' => $this->getActualItem()->id,
+                'group' => $this->getGroup()->id,
+            ]);
+        $response->assertRedirect($this->url);
+        $this->isOrdersCountNotChanged();
+        $response->assertSessionHasErrors('qty');
+    }
+
+    public function testUserCanNotStoreNewItemWithWrongGroup(): void
+    {
+        $response = $this->actingAs($this->getUser())
+            ->from($this->url)
+            ->post($this->storeNewUrl, [
+                'id' => $this->getActualItem()->id,
+                'group' => 0,
+                'qty' => $this->getQty()
+            ]);
+        $response->assertRedirect('/');
+        $this->isOrdersCountNotChanged();
+        $this->assertTrue($response->exception instanceof \Illuminate\Database\Eloquent\ModelNotFoundException);
+    }
+
+    public function testUserCanNotStoreNewItemInArchivedGroup(): void
+    {
+        $this->groupToArchive();
+        $response = $this->actingAs($this->getUser())
+            ->from($this->url)
+            ->post($this->storeNewUrl, [
+                'id' => $this->getActualItem()->id,
+                'group' => $this->getGroup()->id,
+                'qty' => $this->getQty()
+            ]);
+        $response->assertRedirect('/');
+        $this->isOrdersCountNotChanged();
+        $this->assertTrue($response->exception instanceof \Illuminate\Database\Eloquent\ModelNotFoundException);
+    }
+
+    public function testNotAuthtedUserCanNotDestroyOrder(): void
+    {
+        $response = $this->get($this->destroyUrl . $this->getUsersOrderPivot()->id);
+        $this->isNoNewUsersIsOrder();
+        $response->assertRedirect('/login');
+    }
+
+    public function testNotInOrderUserCanNotDestroyOrder(): void
+    {
+        $pivot = $this->getUsersOrderPivot();
+        $this->assertNotEquals($pivot->user_id, $this->getUser()->id);
+        $response = $this->actingAs($this->getUser())
+            ->get($this->destroyUrl.$pivot->id);
+        $this->isNoNewUsersIsOrder();
+        $response->assertRedirect('/');
+    }
+
+    public function testUserCanDestroySelfSingleUserOrder(): void
+    {
+        $order = $this->getSingleUserOrder();
+        $id = $order->id;
+        $pivot = $order->users->first()->pivot;
+        $response = $this->actingAs($this->getUserById($pivot->user_id))
+            ->get($this->destroyUrl . $pivot->id);
+        $this->assertFalse($this->getAllOrders()->pluck('id')->contains($id));
+        $this->assertEquals($this->getItemsCount() - 1, $this->getActualItemsCount());
+        $response->assertRedirect('/');
+    }
+
+    public function testUserCanDestroySelfMultipleUserOrder(): void
+    {
+        $order = $this->getMultipleUsersOrder();
+        $pivot = $order->users->first()->pivot;
+        $response = $this->actingAs($this->getUserById($pivot->user_id))
+            ->get($this->destroyUrl . $pivot->id);
+        $this->assertCount($order->users->count() -1, $this->getMultipleUsersOrder()->users);
+        $this->assertEquals($this->getOrdersCount(), $this->getActualOrdersCount());
+        $this->assertEquals($this->getItemsCount(), $this->getActualItemsCount());
+        $response->assertRedirect('/');
+    }
+
+    public function testAdminUserCanDestroySingleUserOrder(): void
+    {
+        $order = $this->getSingleUserOrder();
+        $id = $order->id;
+        $pivot = $order->users->first()->pivot;
+        $response = $this->actingAs($this->getAdmin())
+            ->get($this->destroyUrl . $pivot->id);
+        $this->assertFalse($this->getAllOrders()->pluck('id')->contains($id));
+        $this->assertEquals($this->getItemsCount() - 1, $this->getActualItemsCount());
+        $response->assertRedirect('/');
+    }
+
+    public function testAdminUserCanDestroyMultipleUserOrder(): void
+    {
+        $order = $this->getMultipleUsersOrder();
+        $pivot = $order->users->first()->pivot;
+        $response = $this->actingAs($this->getAdmin())
+            ->get($this->destroyUrl . $pivot->id);
+        $this->assertCount($order->users->count() -1, $this->getMultipleUsersOrder()->users);
+        $this->assertEquals($this->getOrdersCount(), $this->getActualOrdersCount());
+        $this->assertEquals($this->getItemsCount(), $this->getActualItemsCount());
+        $response->assertRedirect('/');
+    }
+
+    public function testAdminUserCanNotDestroyArchivedOrder(): void
+    {
+        $this->groupToArchive();
+        $order = $this->getGroup()->first()->orders->first();
+        $pivot = $order->users->first()->pivot;
+        $response = $this->actingAs($this->getAdmin())
+            ->get($this->destroyUrl.$pivot->id);
+        $this->assertEquals($this->getOrdersCount(), $this->getActualOrdersCount());
+        $this->assertEquals($this->getItemsCount(), $this->getActualItemsCount());
+        $this->assertCount($order->users->count(), $this->getOrderById($order->id)->users);
         $response->assertRedirect('/');
         $this->assertTrue($response->exception instanceof \App\Exceptions\NotFoundException);
-    }*/
+    }
 
-    
+    protected function isOrdersCountNotChanged(): void
+    {
+        $this->assertEquals($this->getOrdersCount(), $this->getActualOrdersCount());
+    }
+
+    protected function isNoNewUsersIsOrder(): void
+    {
+        $this->assertCount($this->getOrderUsersCount(), $this->getNewOrderUsers());
+    }
+
+    protected function isUserNotInOrder(): bool
+    {
+        return !$this->getItem()->order->users->pluck('id')->contains($this->getUser()->id);
+    }
+
+    protected function getOrderUsersCount(): int
+    {
+        return $this->getItem()->order->users->count();
+    }
+
+    protected function getNewOrderUsers(): Collection
+    {
+        return $this->getItemById($this->getItem()->id)->order->users;
+    }
+
+    protected function getUsersOrderPivot(): object
+    {
+        return $this->getOrder()->users->first()->pivot;
+    }
 
 }

@@ -35,6 +35,11 @@ trait UserTrait
         return User::whereEmail($this->user->email)->first();
     }
 
+    public function getUserById(int $id): User
+    {
+        return User::findOrFail($id);
+    }
+
     public function checkPasswords(string $password, string $hash): bool
     {
         return Hash::check($password, $hash);
