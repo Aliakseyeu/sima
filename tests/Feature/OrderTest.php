@@ -18,8 +18,9 @@ class OrderTest extends Prepare
     protected $storeExistsUrl = '/order/store_exists';
     protected $storeNewUrl = '/order/store_new';
     protected $destroyUrl = '/order/destroy/';
+    protected $updateUrl = '/order/update';
     
-    public function testUserCanNotSeeItemShowPageWithoutSearch(): void
+    /*public function testUserCanNotSeeItemShowPageWithoutSearch(): void
     {
         $response = $this->get($this->url);
         $response->assertStatus(405);
@@ -27,9 +28,19 @@ class OrderTest extends Prepare
 
     public function testUserCanStoreExistentItem(): void
     {
+        $this->userCanStoreExistentItem($this->url);
+    }
+
+    public function testUserCanStoreExistentItemFromIndexPage(): void
+    {
+        $this->userCanStoreExistentItem('/');
+    }
+
+    protected function userCanStoreExistentItem(string $url): void
+    {
         $this->assertTrue($this->isUserNotInOrder());
         $response = $this->actingAs($this->getUser())
-            ->from($this->url)
+            ->from($url)
             ->followingRedirects()
             ->post($this->storeExistsUrl, [
                 'id' => $this->getItem()->order->id,
@@ -185,14 +196,14 @@ class OrderTest extends Prepare
 
     public function testNotAuthtedUserCanNotDestroyOrder(): void
     {
-        $response = $this->get($this->destroyUrl . $this->getUsersOrderPivot()->id);
+        $response = $this->get($this->destroyUrl . $this->getOrderUserPivot()->id);
         $this->isNoNewUsersIsOrder();
         $response->assertRedirect('/login');
     }
 
     public function testNotInOrderUserCanNotDestroyOrder(): void
     {
-        $pivot = $this->getUsersOrderPivot();
+        $pivot = $this->getOrderUserPivot();
         $this->assertNotEquals($pivot->user_id, $this->getUser()->id);
         $response = $this->actingAs($this->getUser())
             ->get($this->destroyUrl.$pivot->id);
@@ -262,6 +273,66 @@ class OrderTest extends Prepare
         $this->assertTrue($response->exception instanceof \App\Exceptions\NotFoundException);
     }
 
+    public function testUserCanNotStoreOrderTwice(): void
+    {
+        $response = $this->actingAs($user = $this->getOrder()->users->first())
+            ->post($this->storeExistsUrl, [
+                'id' => $this->getOrder()->id,
+                'qty' => $this->getQty()
+            ]);
+        $response->assertRedirect('/');
+        $this->assertTrue($response->exception instanceof \App\Exceptions\Order\OrderNotCreatedException);
+        $this->isNoNewUsersIsOrder();
+        $this->assertEquals($this->getOrderUserPivot()->qty, $this->getNewOrderUserPivot()->qty);
+    }
+
+    public function testUserCanUpdateSelfOrder(): void
+    {
+        $response = $this->actingAs($user = $this->getOrder()->users->first())
+            ->followingRedirects()
+            ->post($this->updateUrl, [
+                'id' => ($pivot = $this->getOrderUserPivot())->id,
+                'qty' => $pivot->qty + 1
+            ]);
+        $response->assertOk();
+        $response->assertSee('Заказ успешно обновлен(а)');
+        $this->assertEquals($pivot->qty + 1, $this->getNewOrderUserPivot()->qty);
+    }*/
+
+    public function testAdminCanUpdateAnyOrder(): void
+    {
+        $this->isUserNotInOrder($this->getAdmin());
+        $response = $this->actingAs($user = $this->getAdmin())
+            ->followingRedirects()
+            ->post($this->updateUrl, [
+                'id' => ($pivot = $this->getOrderUserPivot())->id,
+                'qty' => $pivot->qty + 1
+            ]);
+        $response->assertOk();
+        $response->assertSee('Заказ успешно обновлен(а)');
+        $this->assertEquals($pivot->qty + 1, $this->getNewOrderUserPivot()->qty);
+    }
+
+    protected function userCanUpdateOrder(): void
+    {
+        
+    }
+
+    /*public function testUserCanNotUpdateAnotherUsersOrder(): void
+    {
+
+    }
+
+    public function testUserCanNotUpdateSelfOrderWithoutId(): void
+    {
+
+    }
+
+    public function testUserCanNotUpdateSelfOrderWithoutQty(): void
+    {
+
+    }*/
+
     protected function isOrdersCountNotChanged(): void
     {
         $this->assertEquals($this->getOrdersCount(), $this->getActualOrdersCount());
@@ -272,9 +343,9 @@ class OrderTest extends Prepare
         $this->assertCount($this->getOrderUsersCount(), $this->getNewOrderUsers());
     }
 
-    protected function isUserNotInOrder(): bool
+    protected function isUserNotInOrder(\App\User $user = null): bool
     {
-        return !$this->getItem()->order->users->pluck('id')->contains($this->getUser()->id);
+        return !$this->getItem()->order->users->pluck('id')->contains(($user ?? $this->getUser())->id);
     }
 
     protected function getOrderUsersCount(): int
@@ -287,9 +358,14 @@ class OrderTest extends Prepare
         return $this->getItemById($this->getItem()->id)->order->users;
     }
 
-    protected function getUsersOrderPivot(): object
+    protected function getOrderUserPivot(): object
     {
         return $this->getOrder()->users->first()->pivot;
+    }
+
+    protected function getNewOrderUserPivot(): object
+    {
+        return $this->getOrderById($this->getOrder()->id)->users->first()->pivot;
     }
 
 }

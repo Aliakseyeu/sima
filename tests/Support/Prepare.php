@@ -17,12 +17,11 @@ class Prepare extends TestCase
 
     use RefreshDatabase;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
         $this->runArtisan();
-        $this->runTraits();
     }
 
     protected function runArtisan(): void

@@ -2,13 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\User;
 use Tests\Support\Prepare;
 use Tests\Support\UserTrait;
 
 class LoginTest extends Prepare
 {
 
-    use UserTrait;
+    // use UserTrait;
 
     public function testIsLoginPageAvailable(): void
     {
@@ -27,8 +28,8 @@ class LoginTest extends Prepare
     {
         $response = $this->from('/login')
             ->post('/login', [
-                'email' => $this->getUser()->email.'asd', 
-                'password' => $this->getPassword()
+                'email' => User::findOrFail(1)->email.'asd', 
+                'password' => env('PASSWORD')
             ]);
         $response->assertRedirect('/login');
         $this->assertGuest();
@@ -38,7 +39,7 @@ class LoginTest extends Prepare
     {
         $response = $this->from('/login')
             ->post('/login', [
-                'email' => $this->getUser()->email, 
+                'email' => User::findOrFail(1)->email, 
                 'password' => 'wrong-pass'
             ]);
         $response->assertRedirect('/login');
@@ -48,16 +49,16 @@ class LoginTest extends Prepare
     public function testUserCanLoginWithCorrectData(): void
     {
         $response = $this->post('/login', [
-            'email' => $this->getUser()->email,
-            'password' => $this->getPassword(),
+            'email' => ($user = User::findOrFail(1))->email,
+            'password' => env('PASSWORD'),
         ]);
         $response->assertRedirect('/');
-        $this->assertAuthenticatedAs($this->getUser());
+        $this->assertAuthenticatedAs($user);
     }
 
     public function testAuthenticatedUserCanNotSeeLoginPage():void
     {
-        $response = $this->actingAs($this->getUser())->get('/login');
+        $response = $this->actingAs(User::findOrFail(1))->get('/login');
         $response->assertRedirect('/');
     }
 

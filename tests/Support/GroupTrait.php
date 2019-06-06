@@ -7,21 +7,21 @@ use App\{Group, Status};
 trait GroupTrait
 {
 
-    private $group;
+    // private $group;
 
-    public function groupTrait(): void
+    // public function groupTrait(): void
+    // {
+    //     $this->group = Group::first();
+    // }
+
+    public function groupToArchive(Group $group): void
     {
-        $this->group = Group::first();
+        $group->status()->associate(Status::whereSlug('archived')->first())->save();
     }
 
-    public function groupToArchive(): void
-    {
-        $this->group->status()->associate(Status::whereSlug('archived')->first())->save();
-    }
-
-    public function getGroup(): Group
-    {
-        return $this->group;
-    }
+    // public function getGroup(): Group
+    // {
+    //     return $this->group;
+    // }
     
 }

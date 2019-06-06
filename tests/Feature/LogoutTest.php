@@ -2,13 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\User;
 use Tests\Support\Prepare;
-use Tests\Support\UserTrait;
 
 class LogoutTest extends Prepare
 {
-
-    use UserTrait;
 
     public function testNotAuthenticatedUserCanNotLogout(): void
     {
@@ -18,7 +16,7 @@ class LogoutTest extends Prepare
 
     public function testAuthenticatedUserCanLogout(): void
     {
-        $response = $this->actingAs($this->getUser())->post('/logout');
+        $response = $this->actingAs(User::findOrFail(1))->post('/logout');
         $response->assertRedirect('/');
         $this->assertGuest();
     }

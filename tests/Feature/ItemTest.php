@@ -2,22 +2,25 @@
 
 namespace Tests\Feature;
 
-use Tests\Support\{Prepare, GroupTrait, ItemTrait, UserTrait};
+use App\{Group, User};
+use Tests\Support\{Prepare, ItemTrait};
 use \Illuminate\Foundation\Testing\TestResponse as Response;
 
 class ItemTest extends Prepare
 {
 
-    use UserTrait;
-    use GroupTrait;
     use ItemTrait;
 	
     protected $url;
+    protected $group;
+    protected $user;
     
     public function setUp(): void
     {
         parent::setUp();
-        $this->url = $this->getItemCreateUrl($this->getGroup()->id);
+        $this->group = Group::first();
+        $this->url = $this->getItemCreateUrl($this->group->id);
+        $this->user = User::findOrFail(1);
     }
 
     public function testNotAuthenticatedUserCanNotSeeItemSearchPage(): void
@@ -28,20 +31,20 @@ class ItemTest extends Prepare
     
     public function testUserCanNotSeeItemSearchPageWithoutGroup(): void
     {
-        $response = $this->actingAs($this->getUser())->get($this->getItemCreateUrl());
+        $response = $this->actingAs($this->user)->get($this->getItemCreateUrl());
         $response->assertStatus(404);
     }
     
     public function testAuthenticatedUserCanSeeItemSearchPage(): void
     {
-        $response = $this->actingAs($this->getUser())->get($this->url);
+        $response = $this->actingAs($this->user)->get($this->url);
         $response->assertOk();
     }
     
     public function testUserCanNotFindItemWithoutSid(): void
     {
         $response = $this->executeQuery(
-            $this->getQueryData(null, $this->getGroup()->id)
+            $this->getQueryData(null, $this->group->id)
         );
         $response->assertRedirect($this->url);
         $response->assertSessionHasErrors('sid');
@@ -50,7 +53,7 @@ class ItemTest extends Prepare
     public function testUserCanNotFindItemWithoutGroupId()
     {
         $response = $this->executeQuery(
-            $this->getQueryData($this->getItem()->sid, null)
+            $this->getQueryData($this->getActualItem()->sid, null)
         );
         $response->assertRedirect($this->url);
         $response->assertSessionHasErrors('group');
@@ -58,7 +61,7 @@ class ItemTest extends Prepare
     
     public function testUserCanNotFindItemWithWrongSid()
     {
-        $response = $this->executeQuery($this->getQueryData(1, $this->getGroup()->id));
+        $response = $this->executeQuery($this->getQueryData(1, $this->group->id));
         $this->assertTrue($response->exception instanceof \App\Exceptions\NotFoundException);
         $response->assertRedirect('/');
     }
@@ -66,10 +69,9 @@ class ItemTest extends Prepare
     public function testUserCanFindItem()
     {
         $response = $this->executeQuery(
-            $this->getQueryData($this->getItem()->sid, $this->getGroup()->id)
+            $this->getQueryData($this->getActualItem()->sid, $this->group->id)
         );
         $response->assertOk();
-        $response->assertViewIs('orders.create.exists');
         $response->assertSee('Количество');
     }
     
@@ -84,7 +86,7 @@ class ItemTest extends Prepare
     protected function executeQuery(array $data): Response
     {
         return $this->from($this->url)
-            ->actingAs($this->getUser())
+            ->actingAs($this->user)
             ->post('/item/show', $data);
     }
     
