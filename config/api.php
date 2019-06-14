@@ -8,6 +8,6 @@ return [
 //    'pass' => 'krugovorot1991',
     // 'login' => 'katya.platonova.94@inbox.ru',
     // 'pass' => 'pupsenka2210',
-    'login' => 'Irina-sokolova7@rambler.ru',
-    'pass' => 'Sif704',
+    'login' => 'julka_17.11.94@mail.ru',
+    'pass' => '970318s7',
 ];
