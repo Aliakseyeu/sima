@@ -14,9 +14,10 @@ trait GroupTrait
     //     $this->group = Group::first();
     // }
 
-    public function groupToArchive(Group $group): void
+    public function groupToArchive(Group $group): Group
     {
         $group->status()->associate(Status::whereSlug('archived')->first())->save();
+        return $group;
     }
 
     // public function getGroup(): Group

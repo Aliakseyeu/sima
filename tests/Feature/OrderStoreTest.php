@@ -188,12 +188,12 @@ class OrderStoreTest extends Prepare
 
     public function testUserCanNotStoreNewItemInArchivedGroup(): void
     {
-        $this->groupToArchive();
+        $group = $this->groupToArchive($this->group);
         $response = $this->actingAs($this->user)
             ->from($this->showUrl)
             ->post($this->newUrl, [
                 'id' => $this->getActualItem()->id,
-                'group' => $this->group->id,
+                'group' => $group->id,
                 'qty' => $this->getQty()
             ]);
         $response->assertRedirect('/');
