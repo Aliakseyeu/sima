@@ -4,11 +4,13 @@ namespace Tests\Feature;
 
 use Hash;
 use App\User;
-use Tests\Support\Prepare;
+use Tests\Support\{Prepare, UserTrait};
 use \Illuminate\Foundation\Testing\TestResponse as Response;
 
 class RegisterTest extends Prepare
 {
+
+    use UserTrait;
 
     protected $registerUrl = '/register';
     protected $count;
@@ -27,7 +29,7 @@ class RegisterTest extends Prepare
 
     public function testUserCanRegister(): void
     {
-        ($user = User::findOrFail(1))->delete();
+        ($user = $this->getUser())->delete();
         $response = $this->post($this->registerUrl, $data = $this->getRegisterData($user));
         $response->assertRedirect('/');
         $this->assertEquals($this->count, User::count());
@@ -49,7 +51,7 @@ class RegisterTest extends Prepare
     public function testUserCanNotRegisterWithRegisteredEmail(): void
     {
         $response = $this->from($this->registerUrl)
-            ->post($this->registerUrl, $this->mergeRegisterData(['email' => User::findOrFail(1)->email]));
+            ->post($this->registerUrl, $this->mergeRegisterData(['email' => $this->getUser()->email]));
         $this->isUserNotRegistered($response, 'email');
     }
 
@@ -83,7 +85,7 @@ class RegisterTest extends Prepare
     protected function getRegisterData(User $user = null): array
     {
         return array_merge(
-            ($user ?? User::findOrFail(1))->toArray(),
+            ($user ?? $this->getUser())->toArray(),
             [
                 'password' => env('PASSWORD'),
                 'password_confirmation' => env('PASSWORD')

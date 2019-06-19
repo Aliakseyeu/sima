@@ -66,6 +66,9 @@ class OrderController extends Controller
     public function update(OrderUpdateRequest $request)
     {
         $pivot = $this->order->findOrderUserBuilderOrException($request->id);
+        if(!Auth::user()->isAdmin() && Auth::id() != $pivot->first()->user_id){
+            throw new \App\Exceptions\User\NotAuthorizedException;
+        }
         $order = $this->order->findOrFail($pivot->first()->order_id);
         $delivery = $this->deliveryRepository->getDeliveryPrice($order->item->pid, $request->qty);
         if($pivot->update($this->order->getOrderUserData($request->qty, $delivery))){
