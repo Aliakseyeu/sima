@@ -17,5 +17,20 @@ trait GroupTrait
     {
         return Group::first();
     }
+
+    public function getEmptyGroup(): Group
+    {
+        return Group::findOrFail(2);
+    }
+
+    public function isEmptyGroup(Group $group): void
+    {
+        $this->assertTrue($group->orders->count() == 0);
+    }
+
+    public function isNotEmptyGroup(Group $group): void
+    {
+        $this->assertTrue($group->orders->count() > 0);
+    }
     
 }

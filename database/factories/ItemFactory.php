@@ -7,6 +7,6 @@ $factory->define(App\Item::class, function (Faker $faker) {
         'order_id' => App\Order::inRandomOrder()->first(),
         'pid' => $faker->randomNumber,
         'sid' => $faker->randomNumber,
-        'info' => json_encode((object)[])
+        'info' => json_encode((object)['price' => 100])
     ];
 });
