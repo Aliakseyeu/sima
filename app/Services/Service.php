@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use Auth;
-use App\Exceptions\User\NotAuthorizedException;
+use App\Exceptions\NotAuthorizedException;
 
 class Service
 {

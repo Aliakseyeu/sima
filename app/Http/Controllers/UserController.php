@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\User\NotAuthorizedException;
+use App\Exceptions\NotAuthorizedException;
 use Auth;
 use App\User;
 use App\Http\Requests\UserSaveRequest;

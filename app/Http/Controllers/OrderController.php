@@ -67,7 +67,7 @@ class OrderController extends Controller
     {
         $pivot = $this->order->findOrderUserBuilderOrException($request->id);
         if(!Auth::user()->isAdmin() && Auth::id() != $pivot->first()->user_id){
-            throw new \App\Exceptions\User\NotAuthorizedException;
+            throw new \App\Exceptions\NotAuthorizedException;
         }
         $order = $this->order->findOrFail($pivot->first()->order_id);
         $delivery = $this->deliveryRepository->getDeliveryPrice($order->item->pid, $request->qty);

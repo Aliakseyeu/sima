@@ -6,7 +6,7 @@
  * Time: 19:03
  */
 
-namespace App\Exceptions\User;
+namespace App\Exceptions;
 
 use App\Exceptions\BaseException;
 

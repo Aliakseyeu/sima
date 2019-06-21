@@ -57,7 +57,7 @@ class OrderUpdateTest extends Prepare
             ]);
         $response->assertRedirect('/');
         $this->assertEquals($pivot->qty, $this->getOrderUserPivot($order)->qty);
-        $this->assertTrue($response->exception instanceof \App\Exceptions\User\NotAuthorizedException);
+        $this->assertTrue($response->exception instanceof \App\Exceptions\NotAuthorizedException);
     }
 
     public function testUserCanNotUpdateSelfOrderWithoutId(): void

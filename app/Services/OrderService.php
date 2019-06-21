@@ -11,7 +11,7 @@ use App\{Group,
     Status,
     User};
 use App\Objects\{ Delivery, Item as ItemObject, Report, ReportItem, Resp};
-use App\Exceptions\{BaseException, NotFoundException, Order\OrderNotCreatedException, User\NotAuthorizedException};
+use App\Exceptions\{BaseException, NotFoundException, Order\OrderNotCreatedException, NotAuthorizedException};
 use Illuminate\Support\{Carbon, Collection};
 use Auth;
 use DB;
