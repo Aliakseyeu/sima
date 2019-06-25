@@ -89,22 +89,34 @@ class GroupTest extends Prepare
         $this->checkGroupStatus($group, 'archived');
     }
 
-    public function testUserCanNotPutGroupToCart(): void
+    public function testUserCanNotSeeGroupShowPage(): void
     {
-        // $this->isNotEmptyGroup($group = $this->getGroup());
-        // $response = $this->toCartQuery($this->getUser(), $group);
-        // $response->assertRedirect('/');
-        // $this->assertTrue($response->exception instanceof NotAuthorizedException);
+        $response = $this->showQuery($this->getUser());
+        $response->assertRedirect('/');
+        $this->assertTrue($response->exception instanceof NotAuthorizedException);
     }
 
-    public function testAdminCanNotPutEmptyGroupToCart(): void
+    public function testAdminCanSeeGroupShowPage(): void
     {
-        
+        $response = $this->showQuery($this->getAdmin());
+        $response->assertOk();
     }
 
-    public function testAdminCanPutGroupToCart(): void
+    public function testUserCanNotUpdateGroup(): void
     {
-        
+        $this->assertFalse($this->compareComments());
+        $response = $this->updateQuery($this->getUser());
+        $response->assertRedirect('/');
+        $this->assertTrue($response->exception instanceof NotAuthorizedException);
+        $this->assertFalse($this->compareComments());
+    }
+
+    public function testAdminCanUpdateGroup(): void
+    {
+        $this->assertFalse($this->compareComments());
+        $response = $this->updateQuery($this->getAdmin());
+        $response->assertRedirect('/?page=');
+        $this->assertTrue($this->compareComments());
     }
 
     protected function storeQuery(User $user): Response
@@ -122,9 +134,22 @@ class GroupTest extends Prepare
         return $this->actingAs($user)->get('/archive/store/' . $group->id);
     }
 
-    protected function toCartQuery(User $user, Group $group): Response
+    protected function showQuery(User $user): Response
     {
-        return $this->actingAs($user)->get('/group/toCart/' . $group->id);
+        return $this->actingAs($user)->get('/group/'.$this->getGroup()->id.'/show');
+    }
+
+    protected function updateQuery(User $user): Response
+    {
+        return $this->actingAs($user)->post('/group/update', [
+            'id' => $this->getGroup()->id,
+            'comment' => $this->getComment()
+        ]);
+    }
+
+    protected function compareComments(): bool
+    {
+        return $this->getGroup()->comment == $this->getComment();
     }
 
     protected function compareGroupsCount(int $sub = 0, int $add = 0): void

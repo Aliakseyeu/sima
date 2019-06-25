@@ -32,5 +32,10 @@ trait GroupTrait
     {
         $this->assertTrue($group->orders->count() > 0);
     }
+
+    public function getComment(): string
+    {
+        return 'comment';
+    }
     
 }
