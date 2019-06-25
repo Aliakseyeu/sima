@@ -14,7 +14,7 @@ class AddCommentRowToGroupTable extends Migration
     public function up()
     {
         Schema::table('groups', function (Blueprint $table) {
-            $table->string('comment')->after('id')->default('');
+            $table->string('comment')->after('id')->nullable()->default(NULL);
         });
     }
 

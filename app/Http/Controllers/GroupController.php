@@ -6,8 +6,9 @@ use App\{
     Group, Status,
     Objects\Response\IResponsable
 };
+use App\Http\Requests\{GroupUpdateRequest};
 use App\Services\{CartService, GroupService};
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\{Response, RedirectResponse};
 
 class GroupController extends Controller
 {
@@ -48,9 +49,21 @@ class GroupController extends Controller
         return back()->withErrors([__('messages.error.destroyed')]);
     }
 
-    public function update(int $id)
+    public function show(int $id, Response $response)
     {
-        $group = $this->status->new()->groups()->findOrFail($id);
+        $group = $this->group->findOrFail($id);
+        $page = $response->page ?? 1;
+        return view('group.show', compact('group', 'page'));
+    }
+
+    public function update(GroupUpdateRequest $request)
+    {
+        $group = $this->status->new()->groups()->findOrFail($request->id);
+        $group->comment = $request->comment;
+        if($group->save()){
+            return redirect('/?page='.$request->page)->withSuccess([__('messages.updated', ['name'=>__('messages.group')])]);
+        }
+        return redirect('/?page='.$request->page)->withErrors([__('messages.error.updated', ['name'=>__('messages.group')])]);
     }
 
     protected function getRedirect(IResponsable $response): RedirectResponse

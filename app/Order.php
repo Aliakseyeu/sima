@@ -107,14 +107,7 @@ class Order extends BaseModel
         return $this->hasOne(Item::class);
     }
 
-    /*
-     * Accessors and Mutators
-     */
-
-    public function getCreatedAtAttribute($value): string
-    {
-        return Carbon::parse($value)->format('m-d H:i');
-    }
+    
 
 
 

@@ -34,6 +34,8 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/group/store', 'GroupController@store');
         Route::get('/group/toCart/{id}', 'GroupController@toCart')->where('id', '[0-9]+');
         Route::get('/group/destroy/{id}', 'GroupController@destroy')->where('id', '[0-9]+');
+        Route::get('/group/{id}/show', 'GroupController@show')->where('id', '[0-9]+');
+        Route::post('/group/update', 'GroupController@update');
         Route::get('/archive/store/{id}', 'ArchiveController@store')->where('id', '[0-9]+');
     });
 });
